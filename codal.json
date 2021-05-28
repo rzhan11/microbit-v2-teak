@@ -1,4 +1,12 @@
 {
+    "target": {
+        "name": "microbit-v2-teak",
+        "url": "https://github.com/rzhan11/microbit-v2-teak",
+        "branch": "master",
+        "type": "git",
+        "test_ignore": true,
+        "dev": true
+    } ,
     "config":{
         "DEVICE_BLE" : 1,
         "MICROBIT_BLE_ENABLED" : 1,
