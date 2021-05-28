@@ -1,4 +1,4 @@
-libraries
-build
-samples
+libraries/
+build/
+samples/
 MICROBIT.*
