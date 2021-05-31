@@ -1,7 +1,5 @@
 /*
-The MIT License (MIT)
-
-Copyright (c) 2021 Lancaster University.
+Copyright (c) 2019 Trashbots, Inc. - SDG
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -22,81 +20,100 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-/*
-To switch to open link, the simplest method is to replace in codal.json
-        "MICROBIT_BLE_OPEN": 0,
-        "MICROBIT_BLE_SECURITY_LEVEL": "SECURITY_MODE_ENCRYPTION_NO_MITM"
-with
-        "MICROBIT_BLE_OPEN": 1,
-        "MICROBIT_BLE_SECURITY_LEVEL": "SECURITY_MODE_ENCRYPTION_OPEN_LINK"
-
-and in config.json
-        "security_level": "SECURITY_MODE_ENCRYPTION_NO_MITM"
-with
-        "open": 1
-
-The need to specify MICROBIT_BLE_SECURITY_LEVEL with MICROBIT_BLE_OPEN in codal.json
-is a workaround for a problem with the way the macros get defined.
-
-MICROBIT_BLE_WHITELIST stops micro:bit advertising to unbonded devices.
-
-Setting MICROBIT_BLE_OPEN sets some other macros, including clearing MICROBIT_BLE_WHITELIST.
-It's also possible to set the individual macros instead of MICROBIT_BLE_OPEN.
-
-See
-https://github.com/lancaster-university/microbit-dal/blob/master/inc/core/MicroBitConfig.h#L221
-https://github.com/lancaster-university/codal-microbit-v2/blob/master/inc/MicroBitConfig.h#L167
-*/
-
-#include "MicroBit.h"
-
-#include "MicroBitUARTService.h"
+#include <string>
+#include <stdio.h>
+#include <MicroBit.h>
+#include "TeakTask.h"
+#include "TBCDriver.h"
+#include "BLETest.h"
 
 MicroBit uBit;
+// MicroBitI2C i2c = MicroBitI2C(I2C_SDA0, I2C_SCL0);
 
-MicroBitUARTService *uart;
+// MicroBitStorage storage;
+// MicroBitThermometer thermometer(storage);
 
-// we use events abd the 'connected' variable to keep track of the status of the Bluetooth connection
-void onConnected(MicroBitEvent)
+char buffer [20];
+short versionNumber;
+bool connected;
+
+void task_tests();
+
+void onButtonA(MicroBitEvent)
 {
-    uBit.display.print("C");
-}
-
-void onDisconnected(MicroBitEvent)
-{
-    uBit.display.print("D");
-}
-
-void onDelim(MicroBitEvent)
-{
-    ManagedString r = uart->readUntil("\r\n");
-    uart->send(r);
+    uBit.display.scroll("BUTTON A");
 }
 
 int main()
 {
+    // Initialise the micro:bit runtime.
     uBit.init();
+    TBCInit();
+    spi.format(8, 3);
+    spi.frequency(1000000);
+    // gTaskManager.Setup();
+  	versionNumber = -10;
+  	connected = false;
 
-    uBit.messageBus.listen(MICROBIT_ID_BLE, MICROBIT_BLE_EVT_CONNECTED, onConnected);
-    uBit.messageBus.listen(MICROBIT_ID_BLE, MICROBIT_BLE_EVT_DISCONNECTED, onDisconnected);
 
-    uBit.messageBus.listen(MICROBIT_ID_BLE_UART, MICROBIT_UART_S_EVT_DELIM_MATCH, onDelim);
+    uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_BUTTON_EVT_CLICK, onButtonA);
+    // uBit.messageBus.listen(MICROBIT_ID_BLE_UART, MICROBIT_UART_S_EVT_DELIM_MATCH, onDelim);
 
-    new MicroBitAccelerometerService(*uBit.ble, uBit.accelerometer);
-    new MicroBitButtonService(*uBit.ble);
-    new MicroBitIOPinService(*uBit.ble, uBit.io);
-    new MicroBitLEDService(*uBit.ble, uBit.display);
-    //new MicroBitMagnetometerService(*uBit.ble, uBit.compass);
-    new MicroBitTemperatureService(*uBit.ble, uBit.thermometer);
 
-    uart = new MicroBitUARTService(*uBit.ble, 32, 32);
-    uart->eventOn("\r\n");
+    uBit.display.scroll('A');
 
-    uBit.display.scroll("OPEN");
+    // fiber_sleep(1000);
 
-    // If main exits, there may still be other fibers running or registered event handlers etc.
-    // Simply release this fiber, which will mean we enter the scheduler. Worse case, we then
-    // sit in the idle task forever, in a power efficient sleep.
-    release_fiber();
-    return 0;
+    // audio_sound_expression_test();
+    // audio_virtual_pin_melody();
+
+    // task_tests();
+
+    ble_test();
+
+    // uBit.display.scroll("GOODBYE!");
+
+    // while(1) {
+    //   uBit.sleep(100);
+    // }
+}
+
+void task_tests() {
+
+    // audio test
+    MicrobitBtEvent("(nt:1)");
+    fiber_sleep(100);
+    MicrobitBtEvent("(nt:2)");
+    fiber_sleep(100);
+    MicrobitBtEvent("(nt:3)");
+    fiber_sleep(100);
+    MicrobitBtEvent("(nt:4)");
+    fiber_sleep(100);
+    MicrobitBtEvent("(nt:5)");
+    fiber_sleep(100);
+    MicrobitBtEvent("(nt:6)");
+    fiber_sleep(100);
+    MicrobitBtEvent("(nt:7)");
+    fiber_sleep(100);
+    MicrobitBtEvent("(nt:8)");
+
+    // motor test
+    MicrobitBtEvent("(m:(1 2) d:100)");
+    fiber_sleep(1000);
+    MicrobitBtEvent("(m:(1 2) d:-100)");
+    fiber_sleep(1000);
+    MicrobitBtEvent("(m:(1 2) d:0)");
+
+    // pixel image test
+    for (int i = 0; i < 5; i++) {
+      MicrobitBtEvent("(px:000a00110e:1)");
+      fiber_sleep(1000);
+      MicrobitBtEvent("(px:1f1f1f1f1f:1)");
+      fiber_sleep(1000);
+    }
+
+    // print test
+    MicrobitBtEvent("(pr:101)");
+    MicrobitBtEvent("(pr:202)");
+    MicrobitBtEvent("(pr:303)");
 }
