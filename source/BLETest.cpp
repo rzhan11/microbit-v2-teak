@@ -60,17 +60,21 @@ ManagedString eom(";");
 void onConnected(MicroBitEvent)
 {
     uBit.display.print("C");
+    uBit.serial.send("[C]\n");
 }
 
 void onDisconnected(MicroBitEvent)
 {
     uBit.display.print("D");
+    uBit.serial.send("[DC]\n");
 }
 
 void onDelim(MicroBitEvent)
 {
-    ManagedString r = uart->readUntil(eom, ASYNC);
-    uart->send(r);
+    uBit.serial.send("[MSG]: ");
+    ManagedString r = uart->readUntil(";", ASYNC);
+    uBit.serial.send(r);
+    uBit.serial.send("[END_MSG]\n");
 }
 
 void ble_test()

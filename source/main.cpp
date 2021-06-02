@@ -55,6 +55,8 @@ int main()
   	versionNumber = -10;
   	connected = false;
 
+    // uBit.serial.
+
 
     uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_BUTTON_EVT_CLICK, onButtonA);
     // uBit.messageBus.listen(MICROBIT_ID_BLE_UART, MICROBIT_UART_S_EVT_DELIM_MATCH, onDelim);
@@ -74,7 +76,7 @@ int main()
     // uBit.display.scroll("GOODBYE!");
 
     // while(1) {
-    //   uBit.sleep(100);
+    //   uBit.sleep(500);
     // }
 }
 
