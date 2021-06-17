@@ -94,7 +94,7 @@ void ble_test()
     new MicroBitTemperatureService(*uBit.ble, uBit.thermometer);
 
     uart = new MicroBitUARTService(*uBit.ble, 32, 32);
-    uart->eventOn("\r\n");
+    uart->eventOn(";");
 
     uBit.display.scroll("OPEN");
 
